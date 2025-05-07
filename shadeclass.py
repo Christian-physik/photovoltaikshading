@@ -27,12 +27,13 @@ def crosspro(v1,v2):
 class Rectangle:
     def __init__(self,P_bottomleft,P_bottomright,P_upleft):
         self.orign=P_bottomleft
-        self.l1=np.sqrt(np.sum(np.square(P_bottomright-self.orign)))
-        self.e1=(P_bottomright-self.orign)/self.l1
+        self.l1=length(P_bottomright-self.orign)
+        self.e1=normalis(P_bottomright-self.orign)
         
-        self.l2=np.sqrt(np.sum(np.square(P_upleft-self.orign)))
-        self.e2=(P_upleft-self.orign)/self.l2
-        #self.e3=e1 x e2
+        self.l2=length(P_upleft-self.orign)
+        self.e2=normalis(P_upleft-self.orign)
+        
+        self.e3=crosspro(self.e1, self.e2)
         
 p1=np.array((0,0,0))
 p2=np.array((0,1,0))
