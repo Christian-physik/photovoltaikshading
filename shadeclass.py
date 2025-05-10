@@ -23,6 +23,16 @@ def skalar(v1,v2):
     return(np.sum(v1*v2,axis=0))
 def crosspro(v1,v2):
     return(np.cross(v1, v2))
+
+def testsonnenstand(t,geoBreite ,geoLange):
+    h=np.sin(t)/5
+    azimut=t
+    
+    e_Sx=np.cos(h)*np.cos(azimut)
+    e_Sy=np.cos(h)*np.sin(azimut)
+    e_Sz=np.sin(h)
+    E_S=np.array((e_Sx,e_Sy,e_Sz))
+    return(E_S)
     
 class Rectangle:
     def __init__(self,P_bottomleft,P_bottomright,P_upleft):
@@ -95,3 +105,4 @@ mesflache1=photovoltaikfläche(rechteck1, t)
 print('v1length',length(v1))
 print('v1*p3',skalar(v1, p3))
 print('v1xp3',crosspro(v1, p3))
+print('testsonne',testsonnenstand(t, 0, 0))
