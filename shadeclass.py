@@ -44,7 +44,8 @@ class Sphere:
         direcParale_itab=skalar(directline_iab[:, np.newaxis,:,:],eS_it[:,:, np.newaxis,np.newaxis])
         vecd=directline_iab[:, np.newaxis,:,:]-direcParale_itab
         d_tab=length(vecd)
-        print('d',d_tab)
+        #print('d',d_tab)
+        return(d_tab)
 class Rectangle:
     def __init__(self,P_bottomleft,P_bottomright,P_upleft):
         self.orign=P_bottomleft
@@ -67,24 +68,30 @@ class photovoltaikfläche:
         self.ri_iab=self.rect.orign[:, np.newaxis,np.newaxis]\
             +self.rect.e1[:, np.newaxis,np.newaxis]*A\
             +self.rect.e2[:, np.newaxis,np.newaxis]*B
-        print(self.ri_iab)
-        print(length(self.ri_iab))
+
         
     def calcshadow(self,objekt):
         eS=testsonnenstand(t, 0, 0)
-        objekt.checkrays(self.ri_iab,eS)
+        return(objekt.checkrays(self.ri_iab,eS))
         
-p1=np.array((0,0,0))
-p2=np.array((0,5,0))
-p3=np.array((0,0,2))
-p4=np.array((-5,0,1))
+p1=np.array((0,-10,-10))
+p2=np.array((0,5,-10))
+p3=np.array((0,-10,5))
+p4=np.array((-0,0,1))
 v1=np.array((0,3,4))
-t=(np.array((10,11,12,13)))
+t=(np.array((0,0.01,0.1,1)))
+
 rechteck1=Rectangle(p1,p2,p3)
-mesflache1=photovoltaikfläche(rechteck1, t,(6,10))
+mesflache1=photovoltaikfläche(rechteck1, t,(30,30))
 tree1=Sphere(p4, 1)
-print(mesflache1.calcshadow(tree1))
-print('v1length',length(v1))
-print('v1*p3',skalar(v1, p3))
-print('v1xp3',crosspro(v1, p3))
-print('testsonne',testsonnenstand(t, 0, 0))
+
+
+shadow1=mesflache1.calcshadow(tree1)
+
+
+for i in range(len(t)):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.imshow(shadow1[i,:,:])#,vmin=0, vmax=5*np.pi/180)
+    fig.savefig('abstand'+str(i))
+    fig.show()
