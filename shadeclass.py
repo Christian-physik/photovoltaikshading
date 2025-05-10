@@ -57,7 +57,7 @@ class Rectangle:
         
         self.e3=crosspro(self.e1, self.e2)
 class photovoltaikfläche:
-    def __init__(self,rectangle,taxis,datadensity=(3,2),bifa=False):
+    def __init__(self,rectangle,datadensity=(3,2),bifa=False):
         self.rect=rectangle
         a = np.linspace(0,self.rect.l1,datadensity[0])
         b = np.linspace(0,self.rect.l2,datadensity[1])
@@ -70,7 +70,7 @@ class photovoltaikfläche:
             +self.rect.e2[:, np.newaxis,np.newaxis]*B
 
         
-    def calcshadow(self,objekt):
+    def calcshadow(self,objekt,t):
         eS=testsonnenstand(t, 0, 0)
         return(objekt.checkrays(self.ri_iab,eS))
         
@@ -82,11 +82,11 @@ v1=np.array((0,3,4))
 t=(np.array((0,0.01,0.1,1)))
 
 rechteck1=Rectangle(p1,p2,p3)
-mesflache1=photovoltaikfläche(rechteck1, t,(30,30))
+mesflache1=photovoltaikfläche(rechteck1, (30,30))
 tree1=Sphere(p4, 1)
 
 
-shadow1=mesflache1.calcshadow(tree1)
+shadow1=mesflache1.calcshadow(tree1,t)
 
 
 for i in range(len(t)):
