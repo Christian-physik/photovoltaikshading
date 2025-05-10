@@ -33,7 +33,18 @@ def testsonnenstand(t,geoBreite ,geoLange):
     e_Sz=np.sin(h)
     E_S=np.array((e_Sx,e_Sy,e_Sz))
     return(E_S)
-    
+class Sphere: 
+    def __init__(self,P_center,radius,transparency=0):
+        #an sphere thas blocl light like a tree
+        self.p_c=P_center
+        self.r=radius
+        self.trans=transparency
+    def checkrays(self,P0_iab,eS_it):
+        directline_iab=self.p_c[:, np.newaxis,np.newaxis]-P0_iab
+        direcParale_itab=skalar(directline_iab[:, np.newaxis,:,:],eS_it[:,:, np.newaxis,np.newaxis])
+        vecd=directline_iab[:, np.newaxis,:,:]-direcParale_itab
+        d_tab=length(vecd)
+        print('d',d_tab)
 class Rectangle:
     def __init__(self,P_bottomleft,P_bottomright,P_upleft):
         self.orign=P_bottomleft
@@ -53,55 +64,26 @@ class photovoltaikfläche:
         A, B = np.meshgrid(a, b,indexing='ij')
         #2Dimensonal
         #ri_iab=.orign[:,,] #https://numpy.org/doc/stable/user/basics.broadcasting.html
-        ri_iab=self.rect.orign[:, np.newaxis,np.newaxis]\
+        self.ri_iab=self.rect.orign[:, np.newaxis,np.newaxis]\
             +self.rect.e1[:, np.newaxis,np.newaxis]*A\
             +self.rect.e2[:, np.newaxis,np.newaxis]*B
-        print(ri_iab)
-        print(length(ri_iab))
+        print(self.ri_iab)
+        print(length(self.ri_iab))
         
-        #print(A)
-        #print(B)
-        
-        
-        #ad taxis -> 3 dim t,a,b
-        
-        # self.t_tab,self.a_tab, self.b_tab = np.meshgrid(t,a, b,indexing='ij')
-        # x_tab=self.rect.orign[0]+ self.a_tab*self.rect.e1[0] + self.b_tab*self.rect.e2[0]
-        # y_tab=self.rect.orign[1]+ self.a_tab*self.rect.e1[1] + self.b_tab*self.rect.e2[1]
-        # z_tab=self.rect.orign[2]+ self.a_tab*self.rect.e1[2] + self.b_tab*self.rect.e2[2]
-        # self.ri_itab=np.stack((x_tab,y_tab,z_tab))
-        
-        
-        
-        # # print('xyz')
-        # # print(x_tab)
-        # # print('y')
-        # # print(y_tab)
-        # # print(y_tab[1,0,0])
-        # # print(y_tab[0,1,0])
-        # # print(y_tab[0,0,1])
-        # # print('z')
-        # # print(z_tab)
-        # # print(z_tab[1,0,0])
-        # # print(z_tab[0,1,0])
-        # # print(z_tab[0,0,1])
-        # print('length')
-        # print(self.ri_itab[:,0,:,:])
-        #print(length(self.ri_itab))
-        
-        #self.i_itab,self.t_itab,self.a_itab, self.b_itab = np.meshgrid(i,t,a, b)
-        #r=orign+a*e1+b*e2
-        #calculate rx(t,a,b),ry(t,a,b)
-        #numpy.stack xyz an reoder so that r_i(i,t,a,b)
-        #heligkeit(t,a,b)
+    def calcshadow(self,objekt):
+        eS=testsonnenstand(t, 0, 0)
+        objekt.checkrays(self.ri_iab,eS)
         
 p1=np.array((0,0,0))
-p2=np.array((0,1,0))
-p3=np.array((0,0,1.1))
+p2=np.array((0,5,0))
+p3=np.array((0,0,2))
+p4=np.array((-5,0,1))
 v1=np.array((0,3,4))
 t=(np.array((10,11,12,13)))
 rechteck1=Rectangle(p1,p2,p3)
-mesflache1=photovoltaikfläche(rechteck1, t)
+mesflache1=photovoltaikfläche(rechteck1, t,(6,10))
+tree1=Sphere(p4, 1)
+print(mesflache1.calcshadow(tree1))
 print('v1length',length(v1))
 print('v1*p3',skalar(v1, p3))
 print('v1xp3',crosspro(v1, p3))
