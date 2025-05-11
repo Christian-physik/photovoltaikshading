@@ -40,12 +40,21 @@ class Sphere:
         self.r=radius
         self.trans=transparency
     def checkrays(self,P0_iab,eS_it):
-        directline_iab=self.p_c[:, np.newaxis,np.newaxis]-P0_iab
-        direcParale_itab=skalar(directline_iab[:, np.newaxis,:,:],eS_it[:,:, np.newaxis,np.newaxis])
-        vecd=directline_iab[:, np.newaxis,:,:]-direcParale_itab
-        d_tab=length(vecd)
+        #checks if a light ray from P0 in directetion eS go throw this object
+        
+        # vector d:= P-c-Po
+        d_iab=self.p_c[:, np.newaxis,np.newaxis]-P0_iab
+        #split d into 2parts parralle an orthogonal to eS
+        eSd_tab=skalar(d_iab[:, np.newaxis,:,:],eS_it[:,:, np.newaxis,np.newaxis])
+        dParalle_itab=eSd_tab[ np.newaxis,:,:,:] * eS_it[:,:, np.newaxis,np.newaxis]
+        dorthogonal_itab=d_iab[:, np.newaxis,:,:]-dParalle_itab
+        
+        passspher_tab=length(dorthogonal_itab)>self.r
+        bevoresphere=eSd_tab[:, np.newaxis,:,:]<0
+        notinSphere=length(d_iab[:, np.newaxis,:,:])>self.r
+        passed=np.logical_and(notinSphere,np.logical_or(bevoresphere,passspher_tab))
         #print('d',d_tab)
-        return(d_tab)
+        return(passed)
 class Rectangle:
     def __init__(self,P_bottomleft,P_bottomright,P_upleft):
         self.orign=P_bottomleft
