@@ -50,9 +50,14 @@ class Sphere:
         dorthogonal_itab=d_iab[:, np.newaxis,:,:]-dParalle_itab
         
         passspher_tab=length(dorthogonal_itab)>self.r
-        bevoresphere=eSd_tab[:, np.newaxis,:,:]<0
+        bevoresphere=eSd_tab<0
         notinSphere=length(d_iab[:, np.newaxis,:,:])>self.r
         passed=np.logical_and(notinSphere,np.logical_or(bevoresphere,passspher_tab))
+        print('shape')
+        print(passspher_tab.shape)
+        print(bevoresphere.shape)
+        print(notinSphere.shape)
+        print(passed.shape)
         #print('d',d_tab)
         return(passed)
 class Rectangle:
