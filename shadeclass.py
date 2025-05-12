@@ -23,6 +23,67 @@ def skalar(v1,v2):
     return(np.sum(v1*v2,axis=0))
 def crosspro(v1,v2):
     return(np.cross(v1, v2))
+def Sonnenstand(t,geobreitedeg,geolangedeg,azimutcorr=0):
+    tJ2000=t-time.mktime((2000,1,1, 12,0,0, 0,0,0))
+    n_J2000=tJ2000/24.0/3600.0
+
+    n0_J2000=np.floor(n_J2000)+0.5  #+0.5 da von oh aus gerechnet
+    nBruch=n_J2000-n0_J2000
+    tBruch=np.mod(t,24*3600)
+
+    geobreite=geobreitedeg*np.pi/180
+    geolange=geolangedeg*np.pi/180
+    
+    #mittlere eliptikische Länge
+    Ldeg=(280.460+0.9856474*n_J2000)
+    Ldeg=np.mod(Ldeg,360)
+    L=Ldeg*np.pi/180
+    
+    gdeg=(357.528+0.9856003*n_J2000)
+    gdeg=np.mod(gdeg,360)
+
+    g=gdeg*np.pi/180
+    #e=0.0167    #*0
+    #e=edeg*np.pi/180
+    #ekliplaenge=L+2*e*np.sin(g)+5/4*np.square(e)*np.sin(2*g)
+    ekliplaenge_deg= Ldeg+1.915* np.sin(g)+0.01997* np.sin(2*g)
+    ekliplaenge=ekliplaenge_deg*np.pi/180
+    
+    #tilt of eathaxis
+    ee=(23.439-0.0000004*n_J2000)*np.pi/180
+    
+    #Rektaszension
+    rekta=np.arctan(np.cos(ee)*np.tan(ekliplaenge))
+#    if np.cos(ekliplaenge)<0:
+#        rekta+=np.pi
+    rekta[np.cos(ekliplaenge)<0]+=np.pi
+    deklin=np.arcsin(np.sin(ee)*np.sin(ekliplaenge))
+    T0=n0_J2000/36525
+    #LocalHourAngel of Arie
+    #teta=((6.697376+12+2400.05134*T0+1.002738*hBruch)*15 +geolange)*np.pi/180
+    teta=((6.697376+2400.05134*T0+1.002738*nBruch*24)*15 +geolange)*np.pi/180
+    #teta=(6.697376+2400.05134*T0+1.002738*t)*np.pi/12 +geolange
+    
+    tau=teta-rekta #LHA sun
+    teta=np.mod(teta,2*np.pi)
+    azimutsouth=np.arctan2(np.sin(tau),(np.cos(tau)*np.sin(geobreite)-np.tan(deklin)*np.cos(geobreite)))
+    h=np.arcsin(np.cos(deklin)*np.cos(tau)*np.cos(geobreite)+np.sin(deklin)*np.sin(geobreite))
+    azimut=azimutsouth+azimutcorr
+    
+    e_Sx=np.cos(h)*np.cos(azimut)
+    e_Sy=np.cos(h)*np.sin(azimut)
+    e_Sz=np.sin(h)
+    e_S=np.array((e_Sx,e_Sy,e_Sz))
+    fig=plt.figure()
+    plt.plot(t,h,label='h')
+    plt.plot(t,azimut,label='azimut')
+    for k in (0,1,2):
+        plt.plot(t,e_S[k,:],label=str(k))
+    plt.legend()
+    plt.savefig('eS')
+        
+    print('eS',e_S)
+    return(e_S)
 
 def testsonnenstand(t,geoBreite ,geoLange):
     h=np.sin(t)/5
@@ -45,6 +106,8 @@ class Sphere:
         # vector d:= P-c-Po
         d_iab=self.p_c[:, np.newaxis,np.newaxis]-P0_iab
         #split d into 2parts parralle an orthogonal to eS
+        print('d',d_iab.shape)
+        print('eS_it',eS_it.shape)
         eSd_tab=skalar(d_iab[:, np.newaxis,:,:],eS_it[:,:, np.newaxis,np.newaxis])
         dParalle_itab=eSd_tab[ np.newaxis,:,:,:] * eS_it[:,:, np.newaxis,np.newaxis]
         dorthogonal_itab=d_iab[:, np.newaxis,:,:]-dParalle_itab
@@ -85,15 +148,18 @@ class photovoltaikfläche:
 
         
     def calcshadow(self,objekt,t):
-        eS=testsonnenstand(t, 0, 0)
+        eS=Sonnenstand(t, 49, -8)
         return(objekt.checkrays(self.ri_iab,eS))
         
-p1=np.array((0,-10,-10))
-p2=np.array((0,5,-10))
-p3=np.array((0,-10,5))
-p4=np.array((-0,0,1))
+p1=np.array((-10,-10,0))
+p2=np.array((-10,10,0))
+p3=np.array((10,-10,0))
+p4=np.array((-4,0,1))
 v1=np.array((0,3,4))
 t=(np.array((0,0.01,0.1,1)))
+tstart=time.mktime((2000,5,1, 12,0,0, 0,0,0))
+tend=time.mktime((2000,5,2, 12,0,0, 0,0,0))
+t=np.arange(tstart,tend,3600 )
 
 rechteck1=Rectangle(p1,p2,p3)
 mesflache1=photovoltaikfläche(rechteck1, (30,30))
@@ -104,8 +170,9 @@ shadow1=mesflache1.calcshadow(tree1,t)
 
 
 for i in range(len(t)):
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    ax.imshow(shadow1[i,:,:])#,vmin=0, vmax=5*np.pi/180)
-    fig.savefig('abstand'+str(i))
-    fig.show()
+    if i <24:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.imshow(shadow1[i,:,:])#,vmin=0, vmax=5*np.pi/180)
+        fig.savefig('Plots/abstand'+str(i))
+        fig.show()
