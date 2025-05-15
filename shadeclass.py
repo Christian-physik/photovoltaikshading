@@ -205,6 +205,10 @@ p1=np.array((-10,-10,0))
 p2=np.array((-10,10,0))
 p3=np.array((10,-10,0))
 p4=np.array((-4,0,1))
+
+p5=np.array((-0,-0,2))
+p6=np.array((8,0,2))
+p7=np.array((0,3,5))
 v1=np.array((0,3,4))
 t=(np.array((0,0.01,0.1,1)))
 tstart=time.mktime((2000,5,1, 1,0,0, 0,0,0))
@@ -214,9 +218,11 @@ t=np.arange(tstart,tend,3600 )
 rechteck1=Rectangle(p1,p3,p2)
 mesflache1=photovoltaikfläche(rechteck1, (60,60))
 tree1=Sphere(p4, 1)
+wall1=Rectangle(p5,p6,p7)
 
 
 shadow1=mesflache1.calcshadow(tree1,t)
+shadow1=mesflache1.calcshadow(wall1,t)
 
 
 for i in range(len(t)):
