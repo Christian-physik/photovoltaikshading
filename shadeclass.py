@@ -121,8 +121,9 @@ class Sphere:
         print(bevoresphere.shape)
         print(notinSphere.shape)
         print(passed.shape)
+        shadefactor=passed.astype(float)
         #print('d',d_tab)
-        return(passed)
+        return(shadefactor)
 class Rectangle:
     def __init__(self,P_bottomleft,P_bottomright,P_upleft):
         self.orign=P_bottomleft
@@ -131,11 +132,15 @@ class Rectangle:
         
         self.l2=length(P_upleft-self.orign)
         self.e2=normalis(P_upleft-self.orign)
+        if skalar(self.e1, self.e2)!=0 :
+            print('e_1,e_2 are not aorthogonal')
         
         self.e3=crosspro(self.e1, self.e2)
+ 
 class photovoltaikfläche:
     def __init__(self,rectangle,datadensity=(3,2),bifa=False):
         self.rect=rectangle
+        self.bifa=bifa
         a = np.linspace(0,self.rect.l1,datadensity[0])
         b = np.linspace(0,self.rect.l2,datadensity[1])
         i=np.array((0,1,2))
@@ -148,8 +153,21 @@ class photovoltaikfläche:
 
         
     def calcshadow(self,objekt,t):
-        eS=Sonnenstand(t, 49, -8)
-        return(objekt.checkrays(self.ri_iab,eS))
+        p0=1
+        #direction to the sun
+        eS_it=Sonnenstand(t, 49, -8) 
+        #skalar with normal
+        eSd_t=skalar(self.rect.e3[:, np.newaxis],eS_it)#[:,:, np.newaxis,np.newaxis]
+        print(' eSd_tabsize', eSd_t)
+        p0_t=np.abs(np.copy(eSd_t))*p0#for bifaziat
+        p0_t[np.logical_and(eSd_t<0,np.logical_not(self.bifa))]=0
+        p0_tab=p0_t[:, np.newaxis,np.newaxis]
+        print('posize',p0_tab)
+        
+        p0_tab=p0_tab*objekt.checkrays(self.ri_iab,eS_it)
+        return(p0_tab)
+        
+        return(objekt.checkrays(self.ri_iab,eS_it))
         
 p1=np.array((-10,-10,0))
 p2=np.array((-10,10,0))
@@ -157,12 +175,12 @@ p3=np.array((10,-10,0))
 p4=np.array((-4,0,1))
 v1=np.array((0,3,4))
 t=(np.array((0,0.01,0.1,1)))
-tstart=time.mktime((2000,5,1, 12,0,0, 0,0,0))
-tend=time.mktime((2000,5,2, 12,0,0, 0,0,0))
+tstart=time.mktime((2000,5,1, 1,0,0, 0,0,0))
+tend=time.mktime((2000,5,1, 23,0,0, 0,0,0))
 t=np.arange(tstart,tend,3600 )
 
-rechteck1=Rectangle(p1,p2,p3)
-mesflache1=photovoltaikfläche(rechteck1, (30,30))
+rechteck1=Rectangle(p1,p3,p2)
+mesflache1=photovoltaikfläche(rechteck1, (60,60))
 tree1=Sphere(p4, 1)
 
 
@@ -173,6 +191,6 @@ for i in range(len(t)):
     if i <24:
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        ax.imshow(shadow1[i,:,:])#,vmin=0, vmax=5*np.pi/180)
+        ax.imshow(shadow1[i,:,:],vmin=0, vmax=0.5)
         fig.savefig('Plots/abstand'+str(i))
         fig.show()
