@@ -136,7 +136,39 @@ class Rectangle:
             print('e_1,e_2 are not aorthogonal')
         
         self.e3=crosspro(self.e1, self.e2)
- 
+    def checkrays(self,P0_iab,eS_it):
+        #checks if a light ray from P0 in directetion eS go throw this object
+        
+        # vector d:= P-c-Po
+        d_iab=self.orign[:, np.newaxis,np.newaxis]-P0_iab
+        
+        e3eS_t=skalar(self.e3[:, np.newaxis], eS_it)
+        
+        #assume e1 and e2 are orthogonal
+        #chose lambda a1 a2 to be so that:
+        #d=eS*lambda+e1*a1+e2*a2
+        
+        #multiply with e3:
+        #    d*e3= e3eS lambda
+        de3_ab=skalar(d_iab, self.e3[:, np.newaxis,np.newaxis])
+        lambda_tab=de3_ab[np.newaxis,:,:]/e3eS_t[:, np.newaxis,np.newaxis]
+        
+        #multiply with e1
+        #d*e1= lambda*eS*e1+a1
+        #a1=(d-lambda*eS)*e1
+        dlambda_itab=d_iab[:, np.newaxis,:,:]-lambda_tab[ np.newaxis,:,:,:]*eS_it[:,:, np.newaxis,np.newaxis]
+        a1_tab=skalar(dlambda_itab,self.e1[:, np.newaxis,np.newaxis,np.newaxis])
+        a2_tab=skalar(dlambda_itab,self.e2[:, np.newaxis,np.newaxis,np.newaxis])
+        
+        #check if the ray doesnt hit rectangle
+        passe1_tab=np.logical_or(a1_tab<0,a1_tab>self.l1)
+        passe2_tab=np.logical_or(a2_tab<0,a2_tab>self.l2)
+        passrect_tab=np.logical_or(passe1_tab,passe2_tab)
+        bevorrect=lambda_tab<0
+        passed_tab=np.logical_or( passrect_tab,bevorrect)
+        
+        return(passed_tab)
+            
 class photovoltaikfläche:
     def __init__(self,rectangle,datadensity=(3,2),bifa=False):
         self.rect=rectangle
