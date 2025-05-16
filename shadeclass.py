@@ -82,7 +82,7 @@ def Sonnenstand(t,geobreitedeg,geolangedeg,azimutcorr=0):
     plt.legend()
     plt.savefig('eS')
         
-    print('eS',e_S)
+
     return(e_S)
 
 def testsonnenstand(t,geoBreite ,geoLange):
@@ -106,8 +106,7 @@ class Sphere:
         # vector d:= P-c-Po
         d_iab=self.p_c[:, np.newaxis,np.newaxis]-P0_iab
         #split d into 2parts parralle an orthogonal to eS
-        print('d',d_iab.shape)
-        print('eS_it',eS_it.shape)
+
         eSd_tab=skalar(d_iab[:, np.newaxis,:,:],eS_it[:,:, np.newaxis,np.newaxis])
         dParalle_itab=eSd_tab[ np.newaxis,:,:,:] * eS_it[:,:, np.newaxis,np.newaxis]
         dorthogonal_itab=d_iab[:, np.newaxis,:,:]-dParalle_itab
@@ -116,11 +115,7 @@ class Sphere:
         bevoresphere=eSd_tab<0
         notinSphere=length(d_iab[:, np.newaxis,:,:])>self.r
         passed=np.logical_and(notinSphere,np.logical_or(bevoresphere,passspher_tab))
-        print('shape')
-        print(passspher_tab.shape)
-        print(bevoresphere.shape)
-        print(notinSphere.shape)
-        print(passed.shape)
+
         shadefactor=passed.astype(float)
         #print('d',d_tab)
         return(shadefactor)
@@ -134,6 +129,9 @@ class Rectangle:
         self.e2=normalis(P_upleft-self.orign)
         if skalar(self.e1, self.e2)!=0 :
             print('e_1,e_2 are not aorthogonal')
+            print(self.orign)
+            print(self.e1)
+            print(self.e2)
         
         self.e3=crosspro(self.e1, self.e2)
     def checkrays(self,P0_iab,eS_it):
@@ -184,21 +182,55 @@ class photovoltaikfläche:
             +self.rect.e2[:, np.newaxis,np.newaxis]*B
 
         
-    def calcshadow(self,objekts,t):
+    def calcshadow(self,objekts,t,eS_it):
         p0=1
         #direction to the sun
         eS_it=Sonnenstand(t, 49, -8) 
         #skalar with normal
-        eSd_t=skalar(self.rect.e3[:, np.newaxis],eS_it)#[:,:, np.newaxis,np.newaxis]
-        print(' eSd_tabsize', eSd_t)
-        p0_t=np.abs(np.copy(eSd_t))*p0#for bifaziat
-        p0_t[np.logical_and(eSd_t<0,np.logical_not(self.bifa))]=0
+        eSe3_t=skalar(self.rect.e3[:, np.newaxis],eS_it)#[:,:, np.newaxis,np.newaxis]
+
+        p0_t=np.abs(np.copy(eSe3_t))*p0#for bifaziat
+        p0_t[np.logical_and(eSe3_t<0,np.logical_not(self.bifa))]=0
         p0_tab=p0_t[:, np.newaxis,np.newaxis]
-        print('posize',p0_tab)
+
         
         for objekt in objekts:
-            p0_tab=p0_tab*objekt.checkrays(self.ri_iab,eS_it)
+            if not objekt is self:
+                p0_tab=p0_tab*objekt.checkrays(self.ri_iab,eS_it)
+                
+        self.lastcalc_tab=p0_tab
         return(p0_tab)
+    
+class house:
+    def __init__(self, geobreitedeg,geolangedeg,azimutcorr):
+        self.geobreitedeg=geobreitedeg
+        self.geolangedeg=geolangedeg
+        self.azimutcorr=azimutcorr
+        self.allrect=[]
+        self.allsphere=[]
+        self.allsolar=[]
+    def addsphere(self,P_center,radius):
+        newspere=Sphere(np.array(P_center),radius)
+        self.allsphere.append(newspere)
+        return(newspere)
+    def addrect(self,P_bottomleft,P_bottomright,P_upleft):
+        newrect=Rectangle(np.array(P_bottomleft), np.array(P_bottomright),np.array( P_upleft))
+        self.allrect.append(newrect)
+        return(newrect)
+    def addsolarrect(self,P_bottomleft,P_bottomright,P_upleft,datadensity=(3,2),bifa=False):
+        newrect=Rectangle(np.array(P_bottomleft), np.array(P_bottomright),np.array( P_upleft))
+        self.allrect.append(newrect)
+        newsolar=photovoltaikfläche(newrect,datadensity,bifa)
+        self.allsolar.append(newsolar)
+    
+    def calcallshadows(self,t):
+        allobjekts=self.allrect+self.allsphere
+        eS_it=Sonnenstand(t, self.geobreitedeg, self.geolangedeg,self.azimutcorr)
+        for solarect in self.allsolar:
+            solarect.calcshadow(allobjekts,t,eS_it)
+    def plot:
+        https://matplotlib.org/stable/gallery/mplot3d/box3d.html#sphx-glr-gallery-mplot3d-box3d-py
+    
         
         
 p1=np.array((-10,-10,0))
@@ -220,32 +252,42 @@ tstart=time.mktime((2000,3,1, 8,0,0, 0,0,0))
 tend=time.mktime((2000,3,1, 18,0,0, 0,0,0))
 t2=np.arange(tstart,tend,3600 )
 
-rechteck1=Rectangle(p1,p3,p2)
-mesflache1=photovoltaikfläche(rechteck1, (60,60))
-tree1=Sphere(p4, 1)
-tree2=Sphere(p4b, 1)
-wall1=Rectangle(p5,p6,p7)
+
+testhouse=house(49, 8, 0)
+testhouse.addsolarrect((0,2,0), (0,0,0), (0,2,4))
+testhouse.addsolarrect((0,0,0), (2,0,0), (0,0,4))
+testhouse.addsolarrect((2,0,0), (5,0,0), (2,0,2))
+testhouse.addsolarrect((2,0,2), (5,0,2), (2,1,3))
+testhouse.addsphere((3,-1,1), 0.5)
+
+testhouse.calcallshadows(t)
+
+# rechteck1=Rectangle(p1,p3,p2)
+# mesflache1=photovoltaikfläche(rechteck1, (60,60))
+# tree1=Sphere(p4, 1)
+# tree2=Sphere(p4b, 1)
+# wall1=Rectangle(p5,p6,p7)
 
 
 #shadow1=mesflache1.calcshadow(tree1,t)
 #shadow1=mesflache1.calcshadow(wall1,t)
-shadow1=mesflache1.calcshadow((tree1,tree2,wall1),t)
+# shadow1=mesflache1.calcshadow((tree1,tree2,wall1),t)
 
 
-for i in range(len(t)):
-    if i <24:
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-        ax.imshow(shadow1[i,:,:],vmin=0, vmax=0.5)
-        fig.savefig('Plots/shadow'+str(i))
-        fig.show()
+# for i in range(len(t)):
+#     if i <24:
+#         fig = plt.figure()
+#         ax = fig.add_subplot(111)
+#         ax.imshow(shadow1[i,:,:],vmin=0, vmax=0.5)
+#         fig.savefig('Plots/shadow'+str(i))
+#         fig.show()
 
 
-shadow2=mesflache1.calcshadow((tree1,tree2,wall1),t2)
-for i in range(len(t)):
-    if i <24:
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-        ax.imshow(shadow2[i,:,:],vmin=0, vmax=0.5)
-        fig.savefig('Plots/shadow'+str(30+i))
-        fig.show()
+# shadow2=mesflache1.calcshadow((tree1,tree2,wall1),t2)
+# for i in range(len(t)):
+#     if i <24:
+#         fig = plt.figure()
+#         ax = fig.add_subplot(111)
+#         ax.imshow(shadow2[i,:,:],vmin=0, vmax=0.5)
+#         fig.savefig('Plots/shadow'+str(30+i))
+#         fig.show()
