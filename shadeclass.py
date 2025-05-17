@@ -145,8 +145,11 @@ class Rectangle:
         e3eS_t=skalar(self.e3[:, np.newaxis], eS_it)
         
         #assume e1 and e2 are orthogonal
+        #let Phit be the point where the ray hit the rectangle
         #chose lambda a1 a2 to be so that:
-        #d=eS*lambda+e1*a1+e2*a2
+        #Phit=P0+eS*lambda
+        #    =orign+e1*a1+e2*a2
+        #d=eS*lambda-e1*a1-e2*a2
         
         #multiply with e3:
         #    d*e3= e3eS lambda
@@ -154,11 +157,11 @@ class Rectangle:
         lambda_tab=de3_ab[np.newaxis,:,:]/e3eS_t[:, np.newaxis,np.newaxis]
         
         #multiply with e1
-        #d*e1= lambda*eS*e1+a1
-        #a1=(d-lambda*eS)*e1
+        #d*e1= lambda*eS*e1-a1
+        #a1=-(d-lambda*eS)*e1
         dlambda_itab=d_iab[:, np.newaxis,:,:]-lambda_tab[ np.newaxis,:,:,:]*eS_it[:,:, np.newaxis,np.newaxis]
-        a1_tab=skalar(dlambda_itab,self.e1[:, np.newaxis,np.newaxis,np.newaxis])
-        a2_tab=skalar(dlambda_itab,self.e2[:, np.newaxis,np.newaxis,np.newaxis])
+        a1_tab=-skalar(dlambda_itab,self.e1[:, np.newaxis,np.newaxis,np.newaxis])
+        a2_tab=-skalar(dlambda_itab,self.e2[:, np.newaxis,np.newaxis,np.newaxis])
         
         #check if the ray doesnt hit rectangle
         passe1_tab=np.logical_or(a1_tab<0,a1_tab>self.l1)
