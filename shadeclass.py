@@ -76,13 +76,13 @@ def Sonnenstand(t,geobreitedeg,geolangedeg,azimutcorr=0):
     e_Sy=np.cos(h)*np.sin(azimut)
     e_Sz=np.sin(h)
     e_S=np.array((e_Sx,e_Sy,e_Sz))
-    fig=plt.figure()
-    plt.plot(t,h,label='h')
-    plt.plot(t,azimut,label='azimut')
-    for k in (0,1,2):
-        plt.plot(t,e_S[k,:],label=str(k))
-    plt.legend()
-    plt.savefig('eS')
+    # fig=plt.figure()
+    # plt.plot(t,h,label='h')
+    # plt.plot(t,azimut,label='azimut')
+    # for k in (0,1,2):
+    #     plt.plot(t,e_S[k,:],label=str(k))
+    # plt.legend()
+    # plt.savefig('eS')
         
 
     return(e_S)
@@ -231,7 +231,7 @@ class house:
         eS_it=Sonnenstand(t, self.geobreitedeg, self.geolangedeg,self.azimutcorr)
         for solarect in self.allsolar:
             solarect.calcshadow(allobjekts,t,eS_it)
-    def plot(self):
+    def plot(self,name='3dplot'):
         #https://matplotlib.org/stable/gallery/mplot3d/box3d.html#sphx-glr-gallery-mplot3d-box3d-py
         #https://matplotlib.org/stable/gallery/mplot3d/surface3d.html
         #https://matplotlib.org/stable/gallery/mplot3d/surface3d_3.html
@@ -261,14 +261,15 @@ class house:
         zflat=np.concatenate(zs)
         dataflat=np.concatenate(datas)
         ax.scatter(xflat, yflat, zflat, c=dataflat)
-        ax.set_zlim(-1.01, 1.01)
+        ax.set_ylim(-0.01, 5.01)
+        ax.set_zlim(-0.01, 5.01)
         ax.zaxis.set_major_locator(LinearLocator(10))
         # A StrMethodFormatter is used automatically
         ax.zaxis.set_major_formatter('{x:.02f}')
 
         # Add a color bar which maps values to colors.
         #fig.colorbar(surf, shrink=0.5, aspect=5)
-        fig.savefig('3dplot')
+        fig.savefig(name)
 
     
         
@@ -284,8 +285,9 @@ p6=np.array((8,0,2))
 p7=np.array((0,0,5))
 v1=np.array((-4,3,4))
 t=(np.array((0,0.01,0.1,1)))
-tstart=time.mktime((2000,6,1, 8,0,0, 0,0,0))
-tend=time.mktime((2000,6,1, 12,0,0, 0,0,0))
+i=5
+tstart=time.mktime((2000,1,1, 0+i,0,0, 0,0,0))
+tend=time.mktime((2000,1,1, 1+i,0,0, 0,0,0))
 t=np.arange(tstart,tend,3600 )
 
 tstart=time.mktime((2000,3,1, 8,0,0, 0,0,0))
@@ -293,15 +295,33 @@ tend=time.mktime((2000,3,1, 18,0,0, 0,0,0))
 t2=np.arange(tstart,tend,3600 )
 
 
-testhouse=house(49, 8, 0)
-testhouse.addsolarrect((0,2,0), (0,0,0), (0,2,4))
-testhouse.addsolarrect((0,0,0), (2,0,0), (0,0,4))
-testhouse.addsolarrect((2,0,0), (5,0,0), (2,0,2))
-testhouse.addsolarrect((2,0,2), (5,0,2), (2,1,3))
-testhouse.addsphere((3,-1,1), 0.5)
+testhouse=house(0.49, 8, -90*np.pi/180)
+#testhouse.addrect((-200,-200,0), (200,-200,0), (-200,200,0))
+# testhouse.addsolarrect((0,2,0), (0,0,0), (0,2,4))
+# testhouse.addsolarrect((0,0,0), (2,0,0), (0,0,4))
+# #testhouse.addsolarrect((0,0,4), (0,0,0), (2,0,4))
+# testhouse.addsolarrect((2,0,0), (5,0,0), (2,0,2))
+# testhouse.addsolarrect((2,0,2), (5,0,2), (2,1,3))
+# testhouse.addsolarrect((5,2,2), (2,2,2), (5,1,3))
+# testhouse.addsolarrect((2,0,2), (2,2,2), (2,0,4))
+# testhouse.addsolarrect((0,0,4), (2,0,4), (0,2,4))
+
+testhouse.addsolarrect((5,0,0), (5,4,0), (5,0,3))
+# testhouse.addsolarrect((5,2,0), (2,2,0), (5,2,2))
+# testhouse.addsolarrect((2,2,0), (0,2,0), (2,2,4))
+
+testhouse.addrect((5.5,1,0), (5.5,1.5,0), (5.5,1,6))
+testhouse.addsphere((5.5,2,1), 0.3)
+testhouse.addsphere((5.5,0.5,1), 0.3)
 
 testhouse.calcallshadows(t)
 testhouse.plot()
+# for i in range(24):
+#     tstart=time.mktime((2000,1,1, 0+i,0,0, 0,0,0))
+#     tend=time.mktime((2000,1,1, 1+i,0,0, 0,0,0))
+#     t2=np.arange(tstart,tend,3600/6 )
+#     testhouse.calcallshadows(t2)
+#     testhouse.plot('Plots/3dplot_t'+str(i))
 
 # rechteck1=Rectangle(p1,p3,p2)
 # mesflache1=photovoltaikfläche(rechteck1, (60,60))
