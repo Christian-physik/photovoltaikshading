@@ -7,6 +7,8 @@ Created on Tue May  6 18:11:26 2025
 import numpy as np
 #import matplotlib as mpl
 import matplotlib.pyplot as plt
+from matplotlib import cm
+from matplotlib.ticker import LinearLocator
 import scipy.optimize as scopt
 import scipy.fftpack as scfft
 
@@ -199,6 +201,7 @@ class photovoltaikfläche:
                 p0_tab=p0_tab*objekt.checkrays(self.ri_iab,eS_it)
                 
         self.lastcalc_tab=p0_tab
+        self.lastt=t
         return(p0_tab)
     
 class house:
@@ -217,7 +220,7 @@ class house:
         newrect=Rectangle(np.array(P_bottomleft), np.array(P_bottomright),np.array( P_upleft))
         self.allrect.append(newrect)
         return(newrect)
-    def addsolarrect(self,P_bottomleft,P_bottomright,P_upleft,datadensity=(3,2),bifa=False):
+    def addsolarrect(self,P_bottomleft,P_bottomright,P_upleft,datadensity=(30,20),bifa=False):
         newrect=Rectangle(np.array(P_bottomleft), np.array(P_bottomright),np.array( P_upleft))
         self.allrect.append(newrect)
         newsolar=photovoltaikfläche(newrect,datadensity,bifa)
@@ -228,8 +231,45 @@ class house:
         eS_it=Sonnenstand(t, self.geobreitedeg, self.geolangedeg,self.azimutcorr)
         for solarect in self.allsolar:
             solarect.calcshadow(allobjekts,t,eS_it)
-    def plot:
-        https://matplotlib.org/stable/gallery/mplot3d/box3d.html#sphx-glr-gallery-mplot3d-box3d-py
+    def plot(self):
+        #https://matplotlib.org/stable/gallery/mplot3d/box3d.html#sphx-glr-gallery-mplot3d-box3d-py
+        #https://matplotlib.org/stable/gallery/mplot3d/surface3d.html
+        #https://matplotlib.org/stable/gallery/mplot3d/surface3d_3.html
+        fig = plt.figure(figsize=(5, 4))
+        ax = fig.add_subplot(111, projection='3d')
+        xs, ys, zs, datas=[],[],[],[]#np.array(())
+        for solar in self.allsolar:
+            x, y, z =solar.ri_iab[0,:,:],solar.ri_iab[1,:,:],solar.ri_iab[2,:,:]
+            xs.append(x.flatten())
+            ys.append(y.flatten())
+            zs.append(z.flatten())
+            #sum taxis'
+            datapointperh=1
+            data=np.mean(solar.lastcalc_tab,axis=0)
+            datas.append(data.flatten())
+            #colors=cmap=cm.coolwarm(data)
+            #ax.scatter(x, y, z, c=data)
+            #surf=ax.plot_surface(x, y, z,color=colors,  cmap=cm.coolwarm,linewidth=0, antialiased=False)
+            
+            # colors = np.empty(X.shape, dtype=str)
+            # for y in range(ylen):
+            #     for x in range(xlen):
+            #         colors[y, x] = colortuple[(x + y) % len(colortuple)]
+        # Customize the z axis.
+        xflat=np.concatenate(xs)
+        yflat=np.concatenate(ys)
+        zflat=np.concatenate(zs)
+        dataflat=np.concatenate(datas)
+        ax.scatter(xflat, yflat, zflat, c=dataflat)
+        ax.set_zlim(-1.01, 1.01)
+        ax.zaxis.set_major_locator(LinearLocator(10))
+        # A StrMethodFormatter is used automatically
+        ax.zaxis.set_major_formatter('{x:.02f}')
+
+        # Add a color bar which maps values to colors.
+        #fig.colorbar(surf, shrink=0.5, aspect=5)
+        fig.savefig('3dplot')
+
     
         
         
@@ -245,7 +285,7 @@ p7=np.array((0,0,5))
 v1=np.array((-4,3,4))
 t=(np.array((0,0.01,0.1,1)))
 tstart=time.mktime((2000,6,1, 8,0,0, 0,0,0))
-tend=time.mktime((2000,6,1, 18,0,0, 0,0,0))
+tend=time.mktime((2000,6,1, 12,0,0, 0,0,0))
 t=np.arange(tstart,tend,3600 )
 
 tstart=time.mktime((2000,3,1, 8,0,0, 0,0,0))
@@ -261,6 +301,7 @@ testhouse.addsolarrect((2,0,2), (5,0,2), (2,1,3))
 testhouse.addsphere((3,-1,1), 0.5)
 
 testhouse.calcallshadows(t)
+testhouse.plot()
 
 # rechteck1=Rectangle(p1,p3,p2)
 # mesflache1=photovoltaikfläche(rechteck1, (60,60))
