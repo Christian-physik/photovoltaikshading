@@ -167,7 +167,7 @@ class Rectangle:
         passe1_tab=np.logical_or(a1_tab<0,a1_tab>self.l1)
         passe2_tab=np.logical_or(a2_tab<0,a2_tab>self.l2)
         passrect_tab=np.logical_or(passe1_tab,passe2_tab)
-        bevorrect=lambda_tab<0
+        bevorrect=lambda_tab<=0
         passed_tab=np.logical_or( passrect_tab,bevorrect)
         
         return(passed_tab)
@@ -200,7 +200,7 @@ class photovoltaikfläche:
 
         
         for objekt in objekts:
-            if not objekt is self:
+            if not objekt is self.rect:
                 p0_tab=p0_tab*objekt.checkrays(self.ri_iab,eS_it)
                 
         self.lastcalc_tab=p0_tab
@@ -299,19 +299,19 @@ t2=np.arange(tstart,tend,3600 )
 
 
 testhouse=house(0.49, 8, -90*np.pi/180)
-#testhouse.addrect((-200,-200,0), (200,-200,0), (-200,200,0))
-# testhouse.addsolarrect((0,2,0), (0,0,0), (0,2,4))
-# testhouse.addsolarrect((0,0,0), (2,0,0), (0,0,4))
-# #testhouse.addsolarrect((0,0,4), (0,0,0), (2,0,4))
-# testhouse.addsolarrect((2,0,0), (5,0,0), (2,0,2))
-# testhouse.addsolarrect((2,0,2), (5,0,2), (2,1,3))
-# testhouse.addsolarrect((5,2,2), (2,2,2), (5,1,3))
-# testhouse.addsolarrect((2,0,2), (2,2,2), (2,0,4))
-# testhouse.addsolarrect((0,0,4), (2,0,4), (0,2,4))
+testhouse.addrect((-200,-200,0), (200,-200,0), (-200,200,0))
+testhouse.addsolarrect((0,2,0), (0,0,0), (0,2,4))
+testhouse.addsolarrect((0,0,0), (2,0,0), (0,0,4))
+#testhouse.addsolarrect((0,0,4), (0,0,0), (2,0,4))
+testhouse.addsolarrect((2,0,0), (5,0,0), (2,0,2))
+testhouse.addsolarrect((2,0,2), (5,0,2), (2,1,3))
+testhouse.addsolarrect((5,2,2), (2,2,2), (5,1,3))
+testhouse.addsolarrect((2,0,2), (2,2,2), (2,0,4))
+testhouse.addsolarrect((0,0,4), (2,0,4), (0,2,4))
 
-testhouse.addsolarrect((5,0,0), (5,4,0), (5,0,3))
-# testhouse.addsolarrect((5,2,0), (2,2,0), (5,2,2))
-# testhouse.addsolarrect((2,2,0), (0,2,0), (2,2,4))
+testhouse.addsolarrect((5,0,0), (5,2,0), (5,0,2))
+testhouse.addsolarrect((5,2,0), (2,2,0), (5,2,2))
+testhouse.addsolarrect((2,2,0), (0,2,0), (2,2,4))
 
 testhouse.addrect((5.5,1,0), (5.5,1.5,0), (5.5,1,6))
 testhouse.addsphere((5.5,2,1), 0.3)
@@ -319,12 +319,12 @@ testhouse.addsphere((5.5,0.5,1), 0.3)
 
 testhouse.calcallshadows(t)
 testhouse.plot()
-# for i in range(24):
-#     tstart=time.mktime((2000,1,1, 0+i,0,0, 0,0,0))
-#     tend=time.mktime((2000,1,1, 1+i,0,0, 0,0,0))
-#     t2=np.arange(tstart,tend,3600/6 )
-#     testhouse.calcallshadows(t2)
-#     testhouse.plot('Plots/3dplot_t'+str(i))
+for i in range(24):
+    tstart=time.mktime((2000,1,1, 0+i,0,0, 0,0,0))
+    tend=time.mktime((2000,1,1, 1+i,0,0, 0,0,0))
+    t2=np.arange(tstart,tend,3600/6 )
+    testhouse.calcallshadows(t2)
+    testhouse.plot('Plots/3dplot_t'+str(i))
 
 # rechteck1=Rectangle(p1,p3,p2)
 # mesflache1=photovoltaikfläche(rechteck1, (60,60))
