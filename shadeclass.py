@@ -68,6 +68,7 @@ def Sonnenstand(t,geobreitedeg,geolangedeg,azimutcorr=0):
     
     tau=teta-rekta #LHA sun
     teta=np.mod(teta,2*np.pi)
+    print('geobreitlange',geobreitedeg,geobreite,geolange)
     azimutsouth=np.arctan2(np.sin(tau),(np.cos(tau)*np.sin(geobreite)-np.tan(deklin)*np.cos(geobreite)))
     h=np.arcsin(np.cos(deklin)*np.cos(tau)*np.cos(geobreite)+np.sin(deklin)*np.sin(geobreite))
     azimut=azimutsouth+azimutcorr
@@ -190,7 +191,7 @@ class photovoltaikfläche:
     def calcshadow(self,objekts,t,eS_it):
         p0=1
         #direction to the sun
-        eS_it=Sonnenstand(t, 49, -8) 
+        #eS_it=Sonnenstand(t, 49, -8) 
         #skalar with normal
         eSe3_t=skalar(self.rect.e3[:, np.newaxis],eS_it)#[:,:, np.newaxis,np.newaxis]
 
@@ -276,56 +277,58 @@ class house:
 
     
         
-        
-p1=np.array((-10,-10,0))
-p2=np.array((-10,10,0))
-p3=np.array((10,-10,0))
-p4=np.array((-4,-3,2))
-p4b=np.array((-4,-3,0))
-
-p5=np.array((-0,-0,2))
-p6=np.array((8,0,2))
-p7=np.array((0,0,5))
-v1=np.array((-4,3,4))
-t=(np.array((0,0.01,0.1,1)))
-i=5
-tstart=time.mktime((2000,1,1, 0+i,0,0, 0,0,0))
-tend=time.mktime((2000,1,1, 1+i,0,0, 0,0,0))
-t=np.arange(tstart,tend,3600 )
-
-tstart=time.mktime((2000,3,1, 8,0,0, 0,0,0))
-tend=time.mktime((2000,3,1, 18,0,0, 0,0,0))
-t2=np.arange(tstart,tend,3600 )
-
-
-testhouse=house(0.49, 8, -90*np.pi/180)
-testhouse.addrect((-200,-200,0), (200,-200,0), (-200,200,0))
-testhouse.addsolarrect((0,2,0), (0,0,0), (0,2,4))
-testhouse.addsolarrect((0,0,0), (2,0,0), (0,0,4))
-#testhouse.addsolarrect((0,0,4), (0,0,0), (2,0,4))
-testhouse.addsolarrect((2,0,0), (5,0,0), (2,0,2))
-testhouse.addsolarrect((2,0,2), (5,0,2), (2,1,3))
-testhouse.addsolarrect((5,2,2), (2,2,2), (5,1,3))
-testhouse.addsolarrect((2,0,2), (2,2,2), (2,0,4))
-testhouse.addsolarrect((0,0,4), (2,0,4), (0,2,4))
-
-testhouse.addsolarrect((5,0,0), (5,2,0), (5,0,2))
-testhouse.addsolarrect((5,2,0), (2,2,0), (5,2,2))
-testhouse.addsolarrect((2,2,0), (0,2,0), (2,2,4))
-
-testhouse.addrect((5.5,1,0), (5.5,1.5,0), (5.5,1,6))
-testhouse.addsphere((5.5,2,1), 0.3)
-testhouse.addsphere((5.5,0.5,1), 0.3)
-
-testhouse.calcallshadows(t)
-testhouse.plot()
-for i in range(24):
+def main():        
+    p1=np.array((-10,-10,0))
+    p2=np.array((-10,10,0))
+    p3=np.array((10,-10,0))
+    p4=np.array((-4,-3,2))
+    p4b=np.array((-4,-3,0))
+    
+    p5=np.array((-0,-0,2))
+    p6=np.array((8,0,2))
+    p7=np.array((0,0,5))
+    v1=np.array((-4,3,4))
+    t=(np.array((0,0.01,0.1,1)))
+    i=5
     tstart=time.mktime((2000,1,1, 0+i,0,0, 0,0,0))
     tend=time.mktime((2000,1,1, 1+i,0,0, 0,0,0))
-    t2=np.arange(tstart,tend,3600/6 )
-    testhouse.calcallshadows(t2)
-    testhouse.plot('Plots/3dplot_t'+str(i))
+    t=np.arange(tstart,tend,3600 )
+    
+    tstart=time.mktime((2000,3,1, 8,0,0, 0,0,0))
+    tend=time.mktime((2000,3,1, 18,0,0, 0,0,0))
+    t2=np.arange(tstart,tend,3600 )
 
+    
+    
+    testhouse=house(49, 8, -90*np.pi/180)
+    testhouse.addrect((-200,-200,0), (200,-200,0), (-200,200,0))
+    testhouse.addsolarrect((0,2,0), (0,0,0), (0,2,4))
+    testhouse.addsolarrect((0,0,0), (2,0,0), (0,0,4))
+    #testhouse.addsolarrect((0,0,4), (0,0,0), (2,0,4))
+    testhouse.addsolarrect((2,0,0), (5,0,0), (2,0,2))
+    testhouse.addsolarrect((2,0,2), (5,0,2), (2,1,3))
+    testhouse.addsolarrect((5,2,2), (2,2,2), (5,1,3))
+    testhouse.addsolarrect((2,0,2), (2,2,2), (2,0,4))
+    testhouse.addsolarrect((0,0,4), (2,0,4), (0,2,4))
+    
+    testhouse.addsolarrect((5,0,0), (5,2,0), (5,0,2))
+    testhouse.addsolarrect((5,2,0), (2,2,0), (5,2,2))
+    testhouse.addsolarrect((2,2,0), (0,2,0), (2,2,4))
+    
+    testhouse.addrect((5.5,1,0), (5.5,1.5,0), (5.5,1,6))
+    testhouse.addsphere((5.5,2,1), 0.3)
+    testhouse.addsphere((5.5,0.5,1), 0.3)
+    
+    testhouse.calcallshadows(t)
+    testhouse.plot()
+    for i in range(24):
+        tstart=time.mktime((2000,1,1, 0+i,0,0, 0,0,0))
+        tend=time.mktime((2000,1,1, 1+i,0,0, 0,0,0))
+        t2=np.arange(tstart,tend,3600/6 )
+        testhouse.calcallshadows(t2)
+        testhouse.plot('Plots/3dplot_t'+str(i))
+if __name__ == '__main__':
+    main()
 # rechteck1=Rectangle(p1,p3,p2)
 # mesflache1=photovoltaikfläche(rechteck1, (60,60))
 # tree1=Sphere(p4, 1)
