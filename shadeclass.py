@@ -73,6 +73,10 @@ def Sonnenstand(t,geobreitedeg,geolangedeg,azimutcorr=0):
     h=np.arcsin(np.cos(deklin)*np.cos(tau)*np.cos(geobreite)+np.sin(deklin)*np.sin(geobreite))
     azimut=azimutsouth+azimutcorr
     
+    #south=(0,-1.0)
+    #east=(1,0,0)
+    #up=(0,0,1)
+    
     e_Sx=np.cos(h)*np.cos(azimut)
     e_Sy=np.cos(h)*np.sin(azimut)
     e_Sz=np.sin(h)
@@ -239,8 +243,9 @@ class house:
         #https://matplotlib.org/stable/gallery/mplot3d/box3d.html#sphx-glr-gallery-mplot3d-box3d-py
         #https://matplotlib.org/stable/gallery/mplot3d/surface3d.html
         #https://matplotlib.org/stable/gallery/mplot3d/surface3d_3.html
-        fig = plt.figure(figsize=(5, 4))
+        fig = plt.figure(figsize=(10, 8))
         ax = fig.add_subplot(111, projection='3d')
+        #ax2 = fig.add_subplot(212, projection='3d')
         xs, ys, zs, datas=[],[],[],[]#np.array(())
         for solar in self.allsolar:
             x, y, z =solar.ri_iab[0,:,:],solar.ri_iab[1,:,:],solar.ri_iab[2,:,:]
@@ -264,13 +269,16 @@ class house:
         yflat=np.concatenate(ys)
         zflat=np.concatenate(zs)
         dataflat=np.concatenate(datas)
-        ax.scatter(xflat, yflat, zflat, c=dataflat)
-        ax.set_ylim(-0.01, 5.01)
-        ax.set_zlim(-0.01, 5.01)
-        ax.zaxis.set_major_locator(LinearLocator(10))
+        ax.scatter(xflat, yflat, zflat, c=dataflat,s=2)
+        #ax.set_ylim(-0.01, 5.01)
+        #ax.set_zlim(-0.01, 5.01)
+        #ax.zaxis.set_major_locator(LinearLocator(10))
         # A StrMethodFormatter is used automatically
         ax.zaxis.set_major_formatter('{x:.02f}')
-
+        ax.view_init(5, -40, 0)
+        # ax2.scatter(xflat, yflat, zflat, c=dataflat)
+        # ax2.zaxis.set_major_formatter('{x:.02f}')
+        # ax2.view_init(5, -60, 0)
         # Add a color bar which maps values to colors.
         #fig.colorbar(surf, shrink=0.5, aspect=5)
         fig.savefig(name)
@@ -301,7 +309,8 @@ def main():
     
     
     testhouse=house(49, 8, -90*np.pi/180)
-    testhouse.addrect((-200,-200,0), (200,-200,0), (-200,200,0))
+    testhouse.addsolarrect((0,0,0), (0,2,0), (5,0,0))
+    testhouse.addrect((-200,-200,-1), (200,-200,-1), (-200,200,-1))
     testhouse.addsolarrect((0,2,0), (0,0,0), (0,2,4))
     testhouse.addsolarrect((0,0,0), (2,0,0), (0,0,4))
     #testhouse.addsolarrect((0,0,4), (0,0,0), (2,0,4))
