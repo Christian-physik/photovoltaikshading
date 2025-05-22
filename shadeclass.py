@@ -68,17 +68,18 @@ def Sonnenstand(t,geobreitedeg,geolangedeg,azimutcorr=0):
     
     tau=teta-rekta #LHA sun
     teta=np.mod(teta,2*np.pi)
-    print('geobreitlange',geobreitedeg,geobreite,geolange)
+    
     azimutsouth=np.arctan2(np.sin(tau),(np.cos(tau)*np.sin(geobreite)-np.tan(deklin)*np.cos(geobreite)))
     h=np.arcsin(np.cos(deklin)*np.cos(tau)*np.cos(geobreite)+np.sin(deklin)*np.sin(geobreite))
     azimut=azimutsouth+azimutcorr
-    
+   # print('geobreitlange',geobreitedeg,geobreite,geolange,azimut[0]*180/np.pi,h[0]*180/np.pi)
+    #azimut at noon =0 afternooon >0
     #south=(0,-1.0)
     #east=(1,0,0)
     #up=(0,0,1)
     
-    e_Sx=np.cos(h)*np.cos(azimut)
-    e_Sy=np.cos(h)*np.sin(azimut)
+    e_Sx=-np.cos(h)*np.sin(azimut)
+    e_Sy=-np.cos(h)*np.cos(azimut)
     e_Sz=np.sin(h)
     e_S=np.array((e_Sx,e_Sy,e_Sz))
     # fig=plt.figure()
@@ -269,7 +270,7 @@ class house:
         yflat=np.concatenate(ys)
         zflat=np.concatenate(zs)
         dataflat=np.concatenate(datas)
-        ax.scatter(xflat, yflat, zflat, c=dataflat,s=2)
+        ax.scatter(xflat, yflat, zflat, c=dataflat,s=4)
         #ax.set_ylim(-0.01, 5.01)
         #ax.set_zlim(-0.01, 5.01)
         #ax.zaxis.set_major_locator(LinearLocator(10))
@@ -308,7 +309,7 @@ def main():
 
     
     
-    testhouse=house(49, 8, -90*np.pi/180)
+    testhouse=house(49, 8, -1*np.pi/180)
     testhouse.addsolarrect((0,0,0), (0,2,0), (5,0,0))
     testhouse.addrect((-200,-200,-1), (200,-200,-1), (-200,200,-1))
     testhouse.addsolarrect((0,2,0), (0,0,0), (0,2,4))
