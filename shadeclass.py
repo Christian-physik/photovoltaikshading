@@ -7,6 +7,7 @@ Created on Tue May  6 18:11:26 2025
 import numpy as np
 #import matplotlib as mpl
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator
 import scipy.optimize as scopt
@@ -229,7 +230,7 @@ class house:
         newrect=Rectangle(np.array(P_bottomleft), np.array(P_bottomright),np.array( P_upleft))
         self.allrect.append(newrect)
         return(newrect)
-    def addsolarrect(self,P_bottomleft,P_bottomright,P_upleft,datadensity=(30,20),bifa=False):
+    def addsolarrect(self,P_bottomleft,P_bottomright,P_upleft,datadensity=(60,60),bifa=False):
         newrect=Rectangle(np.array(P_bottomleft), np.array(P_bottomright),np.array( P_upleft))
         self.allrect.append(newrect)
         newsolar=photovoltaikfläche(newrect,datadensity,bifa)
@@ -240,7 +241,7 @@ class house:
         eS_it=Sonnenstand(t, self.geobreitedeg, self.geolangedeg,self.azimutcorr)
         for solarect in self.allsolar:
             solarect.calcshadow(allobjekts,t,eS_it)
-    def plot(self,name='3dplot'):
+    def plot(self,name='3dplot',vminmax=(0,1)):
         #https://matplotlib.org/stable/gallery/mplot3d/box3d.html#sphx-glr-gallery-mplot3d-box3d-py
         #https://matplotlib.org/stable/gallery/mplot3d/surface3d.html
         #https://matplotlib.org/stable/gallery/mplot3d/surface3d_3.html
@@ -270,7 +271,12 @@ class house:
         yflat=np.concatenate(ys)
         zflat=np.concatenate(zs)
         dataflat=np.concatenate(datas)
-        ax.scatter(xflat, yflat, zflat, c=dataflat,s=4)
+        norm = mpl.colors.Normalize(*vminmax)#vmin=0, vmax=1)
+        datanorm=norm(dataflat)
+        colormap=plt.get_cmap('plasma')
+        colors=colormap(datanorm)
+        pscatter=ax.scatter(xflat, yflat, zflat, c=colors,s=4)
+        #fig.colorbar(pscatter, ax=ax)
         #ax.set_ylim(-0.01, 5.01)
         #ax.set_zlim(-0.01, 5.01)
         #ax.zaxis.set_major_locator(LinearLocator(10))
