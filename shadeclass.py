@@ -214,6 +214,15 @@ class photovoltaikfläche:
         self.lastt=t
         return(p0_tab)
     
+    def plot_onepoint(self,abindex):
+        t=self.lastt
+        data=self.lastcalc_tab[:,abindex[0],abindex[1]]
+        plt.figure()
+        plt.plot(t,data)
+        plt.savefig('onepoint')
+        print(t)
+        print(data)
+    
 class house:
     def __init__(self, geobreitedeg,geolangedeg,azimutcorr):
         self.geobreitedeg=geobreitedeg
@@ -235,6 +244,7 @@ class house:
         self.allrect.append(newrect)
         newsolar=photovoltaikfläche(newrect,datadensity,bifa)
         self.allsolar.append(newsolar)
+        return(newsolar)
     
     def calcallshadows(self,t):
         allobjekts=self.allrect+self.allsphere
@@ -289,6 +299,7 @@ class house:
         # Add a color bar which maps values to colors.
         #fig.colorbar(surf, shrink=0.5, aspect=5)
         fig.savefig(name)
+        
 
     
         
