@@ -27,6 +27,7 @@ def skalar(v1,v2):
 def crosspro(v1,v2):
     return(np.cross(v1, v2))
 def Sonnenstand(t,geobreitedeg,geolangedeg,azimutcorr=0):
+    # function that caculTE the direction to the sun
     tJ2000=t-time.mktime((2000,1,1, 12,0,0, 0,0,0))
     n_J2000=tJ2000/24.0/3600.0
 
@@ -105,7 +106,7 @@ def testsonnenstand(t,geoBreite ,geoLange):
     return(E_S)
 class Sphere: 
     def __init__(self,P_center,radius,transparency=0):
-        #an sphere thas blocl light like a tree
+        #an sphere that blocl light; like a tree
         self.p_c=P_center
         self.r=radius
         self.trans=transparency
@@ -130,6 +131,7 @@ class Sphere:
         return(shadefactor)
 class Rectangle:
     def __init__(self,P_bottomleft,P_bottomright,P_upleft):
+        #an rectangle surface that block light
         self.orign=P_bottomleft
         self.l1=length(P_bottomright-self.orign)
         self.e1=normalis(P_bottomright-self.orign)
@@ -298,6 +300,8 @@ class house:
         # ax2.view_init(5, -60, 0)
         # Add a color bar which maps values to colors.
         #fig.colorbar(surf, shrink=0.5, aspect=5)
+        #for rect in self.allrect:
+        #    surf = ax.plot_surface(solar.ri_iab[0,:,:],rect.ri_iab[1,:,:],solar.ri_iab[2,:,:], cmap=cm.Blues, linewidth=0)#facecolors='grey'
         fig.savefig(name)
         
 
